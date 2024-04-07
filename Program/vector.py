@@ -1,10 +1,12 @@
 import math
-from vector import Vector
+
 
 class Vector:
+    """representation of a vector
+    """
     def __init__(self):
         self._vec = {}
-        
+
     def get_weight(self, term: str) -> float:
         """gets the weight of a term in the vector
 
@@ -15,8 +17,8 @@ class Vector:
             float: weight of the term in the vector
         """
         return self._vec[term]
-        
-    def add_component(self, term: str, weight: float): 
+
+    def add_component(self, term: str, weight: float):
         """Adds a component to the vector.
 
         Args:
@@ -24,7 +26,7 @@ class Vector:
             weight (float): weight of the component
         """
         self._vec[term] = weight
-        
+
     def get_magnitude(self) -> float:
         """gets the magnitude of the vector (square root of the sum of the squares)
 
@@ -33,10 +35,10 @@ class Vector:
         """
         total = 0
         for weight in self._vec.values():
-            total += weight ** 2
+            total += weight**2
         return math.sqrt(total)
-        
-    def get_sim_score(self, other: Vector) -> float:
+
+    def get_sim_score(self, other) -> float:
         """computes the similarity score between this and another vector
 
         Args:
@@ -50,12 +52,12 @@ class Vector:
         for term in self._vec.keys():
             if term in other:
                 score += self.get_weight(term) * other.get_weight(term)
-                
+
         # divide by the magnitudes of the vectors
-        score = score/self.get_magnitude  
-        score = score/other.get_magnitude  
+        score = score / self.get_magnitude()
+        score = score / other.get_magnitude()
         return score
-        
+
     def __contains__(self, term: str):
         """overrides the contains method for the Vector class
 
@@ -66,3 +68,16 @@ class Vector:
             _type_: true if the vector contains the term
         """
         return term in self._vec
+    
+    def __str__(self) -> str:
+        """string representation of a vector
+
+        Returns:
+            str: representation of vector
+        """
+        text = "======="
+        for term in self._vec:
+            text += term + ": " + str(self.get_weight(term)) + "\n"
+        text += "========"
+        return text
+        

@@ -1,18 +1,19 @@
 import re
 import math
 from document import Document
+from vector import Vector
+from docstat_container import DocstatContainer
 
 
 class Collection:
-    
-    _document_counter = 0
+    """class defining the collection
+    """
 
     def __init__(self):
         """Constructor"""
         ## for every item in the sample value, add to index.
-        _index = (
-        {}
-    )
+        self._index = {}
+        self._document_counter = 0
 
     def add_document_to_index(self, doc: Document) -> None:
         """adds a document into the collection's inverted index
@@ -20,7 +21,7 @@ class Collection:
         Args:
             doc (Document): the document to be added.
         """
-        # Remove whitespaces, punctuation and create list of all words in doc. 
+        # Remove whitespaces, punctuation and create list of all words in doc.
         punctuationless = re.sub(r"[.,\/#!$%\^&\*;:{}=\-_`~()]", "", doc.get_body())
         final_string = re.sub(r"\s{2,}", " ", punctuationless)
         document_array = final_string.split()
@@ -36,25 +37,25 @@ class Collection:
         # add all data to the main inverted index
         for doc_term in temp_index.keys():
             if doc_term in self._index:
-                self._index[doc_term].append((doc, temp_index[doc_term]))
+                self._index[doc_term].add_stats(doc, temp_index[doc_term])
             else:
-                self._index[doc_term] = [(doc, temp_index[doc_term])]
-                
+                self._index[doc_term] = DocstatContainer()
+                self._index[doc_term].add_stats(doc, temp_index[doc_term])
+
         self._increment_docs()
-    
-    def print_index(self):
-        """prints contents of index. Used for testing
-        """
-        for term in self._index.keys():
-            print("term: " + str(term))
-            for doc in self._index[term]:
-                print("    -> " + str(doc[1]) + " in: " + str(doc[0].get_id()))
-                
-    def _increment_docs(self) -> None: 
-        """increments the number of documents by 1
-        """
+
+    # FIXME: update to work with new docstat
+    # def print_index(self):
+    #     """prints contents of index. Used for testing"""
+    #     for term in self._index.keys():
+    #         print("term: " + str(term))
+    #         for doc in self._index[term]:
+    #             print("    -> " + str(doc[1]) + " in: " + str(doc[0].get_id()))
+
+    def _increment_docs(self) -> None:
+        """increments the number of documents by 1"""
         self._document_counter += 1
-        
+
     def get_df(self, term: str) -> int:
         """finds the document frequency (df) of a term in the collection
 
@@ -67,12 +68,12 @@ class Collection:
         Returns:
             int: document frequency of a term in the collection
         """
-        if term in self._index:
+        if term in self:
             return len(self._index[term])
         else:
             raise ValueError(term + " does not appear in the collection")
-        
-    def get_idf(self, term: str) -> float: 
+
+    def get_idf(self, term: str) -> float:
         """gets the inverse document frequency (idf) of a term
 
         Args:
@@ -81,12 +82,12 @@ class Collection:
         Returns:
             float: idf of the term
         """
-        try: 
-            return math.log(self._document_counter/float(self.get_df(term)))
-        except ValueError as e: 
+        try:
+            return math.log(self._document_counter / float(self.get_df(term)), 10)
+        except ValueError as e:
             print("An error occured: ", e)
-        
-    def get_tf(self, term: str, document: Document) -> int: 
+
+    def get_tf(self, term: str, document: Document) -> int:
         """finds the term frequency (tf) of a term in a document
 
         Args:
@@ -100,15 +101,13 @@ class Collection:
         Returns:
             int: term frequency (tf) of a term in a document
         """
-        if not term in self._index:
+        if not term in self:
             raise ValueError(term + " is not in the collection")
-        for tuple in self._index[term]:
-            if tuple[0] == document:
-                return tuple[1]
+        if document in self._index[term]:
+            return self._index[term].get_tf(document)
         raise ValueError("the document doesn't contain the term")
-        
 
-    def get_tfidf(self, term: str, document: Document) -> float: 
+    def get_tfidf(self, term: str, document: Document) -> float:
         """gets the tf-idf weighting of the term for a given document
 
         Args:
@@ -118,8 +117,20 @@ class Collection:
         Returns:
             float: tf-idf weighting of the term in the document vector
         """
-        try: 
+        try:
             return self.get_tf(term, document) * self.get_idf(term)
-        except ValueError as e: 
+        except ValueError as e:
             print("An error occured: ", e)
-            
+
+    def get_vector(self, document: Document) -> Vector:
+        temp_vec = []
+        for term in self._index.keys():
+            if document in self._index[term]:
+                temp_vec.append((term, self.get_tfidf(term, document)))
+        v = Vector()
+        for component in temp_vec:
+            v.add_component(component[0], component[1])
+        return v
+    
+    def __contains__(self, term: str) -> bool:
+        return term in self._index
