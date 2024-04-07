@@ -2,8 +2,8 @@ import math
 
 
 class Vector:
-    """representation of a vector
-    """
+    """representation of a vector"""
+
     def __init__(self):
         self._vec = {}
 
@@ -68,7 +68,7 @@ class Vector:
             _type_: true if the vector contains the term
         """
         return term in self._vec
-    
+
     def __str__(self) -> str:
         """string representation of a vector
 
@@ -80,4 +80,3 @@ class Vector:
             text += term + ": " + str(self.get_weight(term)) + "\n"
         text += "========"
         return text
-        

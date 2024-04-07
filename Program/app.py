@@ -41,9 +41,10 @@ def run():
         # TODO: take queries and rank scores.
         query_vec = Vector()
         query_vec.add_component(user_input, 1.0)
-        print(query_vec.get_sim_score(c.get_vector(doc1)))
-        print(query_vec.get_sim_score(c.get_vector(doc2)))
-        print(query_vec.get_sim_score(c.get_vector(doc3)))
+        print("doc1 score: ", query_vec.get_sim_score(c.get_vector(doc1)))
+        print("doc2 score: ", query_vec.get_sim_score(c.get_vector(doc2)))
+        print("doc3 score: ", query_vec.get_sim_score(c.get_vector(doc3)))
+
 
 if __name__ == "__main__":
     run()

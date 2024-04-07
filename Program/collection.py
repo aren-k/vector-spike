@@ -6,8 +6,7 @@ from docstat_container import DocstatContainer
 
 
 class Collection:
-    """class defining the collection
-    """
+    """class defining the collection"""
 
     def __init__(self):
         """Constructor"""
@@ -44,14 +43,6 @@ class Collection:
 
         self._increment_docs()
 
-    # FIXME: update to work with new docstat
-    # def print_index(self):
-    #     """prints contents of index. Used for testing"""
-    #     for term in self._index.keys():
-    #         print("term: " + str(term))
-    #         for doc in self._index[term]:
-    #             print("    -> " + str(doc[1]) + " in: " + str(doc[0].get_id()))
-
     def _increment_docs(self) -> None:
         """increments the number of documents by 1"""
         self._document_counter += 1
@@ -70,6 +61,7 @@ class Collection:
         """
         if term in self:
             return len(self._index[term])
+
         else:
             raise ValueError(term + " does not appear in the collection")
 
@@ -123,6 +115,14 @@ class Collection:
             print("An error occured: ", e)
 
     def get_vector(self, document: Document) -> Vector:
+        """gets vector of a document
+
+        Args:
+            document (Document): document to represent as a vector
+
+        Returns:
+            Vector: vector of a document
+        """
         temp_vec = []
         for term in self._index.keys():
             if document in self._index[term]:
@@ -131,6 +131,14 @@ class Collection:
         for component in temp_vec:
             v.add_component(component[0], component[1])
         return v
-    
+
     def __contains__(self, term: str) -> bool:
+        """magic method for whether this collection contains a term
+
+        Args:
+            term (str): term to be checked for
+
+        Returns:
+            bool: true if the term is in the collection
+        """
         return term in self._index
